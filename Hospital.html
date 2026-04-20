@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Management System - Advanced</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root{
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --danger:#dc2626;
+      --success:#16a34a;
+      --warning:#d97706;
+      --border:#e5e7eb;
+      --shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+      --radius: 18px;
+    }
+
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef4ff 0%, #f7fbff 100%);
+      color:var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .animate-fade-up { animation: fadeInUp 0.5s ease; }
+    .animate-fade { animation: fadeIn 0.5s ease; }
+    .animate-left { animation: slideInLeft 0.5s ease; }
+    .animate-pop { animation: popIn 0.4s ease; }
+
+    .app-header{
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      animation: fadeIn 0.7s ease;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      font-size:22px;
+      color:var(--primary);
+    }
+
+    .brand .logo{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      color:white;
+      display:grid;
+      place-items:center;
+      font-size:24px;
+      box-shadow: var(--shadow);
+      animation: pulse 2s infinite;
+    }
+
+    .container{
+      width:min(1250px, 94%);
+      margin: 24px auto 40px;
+    }
+
+    .auth-wrap{
+      min-height: calc(100vh - 100px);
+      display:grid;
+      place-items:center;
+    }
+
+    .auth-card{
+      width:min(450px, 100%);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:28px;
+      box-shadow: var(--shadow);
+      animation: popIn 0.5s ease;
+    }
+
+    .auth-card h2{
+      margin-bottom: 8px;
+      font-size:28px;
+    }
+
+    .auth-card p{
+      margin-bottom: 20px;
+      color:var(--muted);
+    }
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:14px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    label{
+      font-size:14px;
+      color:#374151;
+      font-weight:600;
+    }
+
+    input, select, textarea{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      outline:none;
+      background:#fff;
+      font-size:14px;
+      transition: all .25s ease;
+    }
+
+    textarea{ resize: vertical; min-height: 90px; }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:#93c5fd;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+      transform: translateY(-1px);
+    }
+
+    .btn{
+      border:none;
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition: all .2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover{ transform: translateY(-2px); }
+    .btn:active{ transform: scale(0.98); }
+
+    .btn-primary{
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      color:#fff;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-secondary{
+      background:#eef2ff;
+      color:#3730a3;
+    }
+
+    .btn-danger{
+      background:#fee2e2;
+      color:var(--danger);
+    }
+
+    .btn-success{
+      background:#dcfce7;
+      color:var(--success);
+    }
+
+    .btn-warning{
+      background:#fef3c7;
+      color:var(--warning);
+    }
+
+    .muted-link{
+      color:var(--primary);
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+    }
+
+    .hidden{ display:none !important; }
+
+    .main-layout{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .sidebar{
+      position: sticky;
+      top: 92px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:18px;
+      box-shadow: var(--shadow);
+      animation: slideInLeft 0.6s ease;
+    }
+
+    .user-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border:1px dashed #bfdbfe;
+      border-radius:18px;
+      background:#f8fbff;
+      margin-bottom:16px;
+    }
+
+    .avatar{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      color:white;
+      display:grid;
+      place-items:center;
+      font-weight:700;
+      font-size:20px;
+    }
+
+    .nav{
+      display:grid;
+      gap:10px;
+    }
+
+    .nav button{
+      width:100%;
+      text-align:left;
+      background:#fff;
+      border:1px solid var(--border);
+      padding:12px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+      color:#374151;
+      transition: all .25s ease;
+    }
+
+    .nav button:hover{
+      background: #f8fbff;
+      transform: translateX(3px);
+    }
+
+    .nav button.active{
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .content{
+      display:grid;
+      gap:20px;
+    }
+
+    .section{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:20px;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.45s ease;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .section-head h3{
+      margin:0;
+      font-size:24px;
+    }
+
+    .section-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:16px;
+    }
+
+    .stat-card{
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px;
+      animation: fadeInUp 0.5s ease;
+      transition: all .3s ease;
+    }
+
+    .stat-card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(37,99,235,.12);
+    }
+
+    .stat-card h4{
+      margin-bottom: 10px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .stat-card .value{
+      font-size:30px;
+      font-weight:800;
+      color:var(--primary);
+    }
+
+    .toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .toolbar input{
+      max-width: 320px;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius:18px;
+      border:1px solid var(--border);
+      animation: fadeIn 0.4s ease;
+    }
+
+    th, td{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:14px;
+      vertical-align: top;
+    }
+
+    th{
+      background:#f8fbff;
+      color:#374151;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    tr{
+      animation: fadeInUp 0.3s ease;
+    }
+
+    tr:hover td{
+      background:#fcfdff;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .pill-paid{ background:#dcfce7; color:#166534; }
+    .pill-pending{ background:#fef3c7; color:#92400e; }
+    .pill-done{ background:#dbeafe; color:#1d4ed8; }
+    .pill-admin{ background:#dbeafe; color:#1d4ed8; }
+    .pill-staff{ background:#f3e8ff; color:#7e22ce; }
+
+    .summary-box{
+      border:1px dashed #c7d2fe;
+      background:#f8faff;
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .small{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:24px;
+      border:1px dashed var(--border);
+      border-radius:18px;
+      background:#fafcff;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* TOAST */
+    .toast-container{
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: grid;
+      gap: 12px;
+    }
+
+    .toast{
+      min-width: 260px;
+      max-width: 340px;
+      background: white;
+      border-left: 5px solid var(--primary);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 12px 28px rgba(0,0,0,.12);
+      animation: popIn .3s ease;
+    }
+
+    .toast.success{ border-left-color: var(--success); }
+    .toast.error{ border-left-color: var(--danger); }
+    .toast.warning{ border-left-color: var(--warning); }
+
+    .toast strong{
+      display:block;
+      margin-bottom: 4px;
+    }
+
+    /* LOADER */
+    .loader-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      backdrop-filter: blur(4px);
+    }
+
+    .loader-box{
+      background: white;
+      padding: 24px 28px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 700;
+      animation: popIn .3s ease;
+    }
+
+    .spinner{
+      width: 26px;
+      height: 26px;
+      border: 3px solid #dbeafe;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @media (max-width: 1000px){
+      .cards{ grid-template-columns: repeat(2, 1fr); }
+      .main-layout{ grid-template-columns: 1fr; }
+      .sidebar{ position: static; }
+    }
+
+    @media (max-width: 700px){
+      .grid-2{ grid-template-columns: 1fr; }
+      .cards{ grid-template-columns: 1fr; }
+      .app-header{ padding:14px 16px; }
+      .brand{ font-size:18px; }
+      .brand .logo{ width:38px; height:38px; font-size:20px; }
+      th, td{ font-size:13px; padding:10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- LOADER -->
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader-box">
+      <div class="spinner"></div>
+      <span>Processing...</span>
+    </div>
+  </div>
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">🏥</div>
+      <div>Hospital Management System</div>
+    </div>
+    <div id="headerActions" class="hidden" style="display:flex; gap:10px; align-items:center;">
+      <span id="roleBadge" class="pill pill-admin">Admin</span>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- AUTH -->
+    <div id="authSection" class="auth-wrap">
+      <div class="auth-card" id="loginCard">
+        <h2>Welcome Back</h2>
+        <p>Login to manage hospital data securely.</p>
+
+        <div class="grid">
+          <div class="field">
+            <label>Username</label>
+            <input type="text" id="loginUsername" placeholder="Enter username" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter password" />
+          </div>
+          <button class="btn btn-primary" onclick="login()">Login</button>
+          <div class="small">
+            Don’t have an account?
+            <a class="muted-link" onclick="toggleAuth('signup')">Create one</a>
+          </div>
+          <div class="small">
+            Demo Admin Login: <b>admin</b> / <b>admin123</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-card hidden" id="signupCard">
+        <h2>Create Account</h2>
+        <p>Create a new hospital system account.</p>
+
+        <div class="grid">
+          <div class="field">
+            <label>Username</label>
+            <input type="text" id="signupUsername" placeholder="Create username" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="signupPassword" placeholder="Create password" />
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <select id="signupRole">
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="signup()">Signup</button>
+          <div class="small">
+            Already have an account?
+            <a class="muted-link" onclick="toggleAuth('login')">Login here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div id="appSection" class="hidden">
+      <div class="main-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+          <div class="user-box">
+            <div class="avatar" id="avatarText">A</div>
+            <div>
+              <div style="font-weight:800;" id="currentUserName">Admin</div>
+              <div class="small" id="currentUserRoleText">System Administrator</div>
+            </div>
+          </div>
+
+          <div class="nav">
+            <button class="active" onclick="showSection('dashboard', this)">📊 Dashboard</button>
+            <button onclick="showSection('patients', this)">🧑‍⚕️ Patients</button>
+            <button onclick="showSection('doctors', this)">👨‍⚕️ Doctors</button>
+            <button onclick="showSection('appointments', this)">📅 Appointments</button>
+            <button onclick="showSection('billing', this)">💳 Billing / Invoice</button>
+            <button onclick="showSection('pharmacy', this)">💊 Pharmacy</button>
+            <button onclick="showSection('laboratory', this)">🧪 Laboratory</button>
+            <button onclick="showSection('discharge', this)">📄 Discharge Summary</button>
+            <button id="adminNavBtn" onclick="showSection('adminPanel', this)">🛡️ Admin Module</button>
+          </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="content">
+
+          <!-- DASHBOARD -->
+          <section class="section" id="dashboard">
+            <div class="section-head">
+              <div>
+                <h3>Dashboard</h3>
+                <p>Overview of hospital activities and quick statistics.</p>
+              </div>
+            </div>
+
+            <div class="cards">
+              <div class="stat-card"><h4>Total Patients</h4><div class="value" id="statPatients">0</div></div>
+              <div class="stat-card"><h4>Total Doctors</h4><div class="value" id="statDoctors">0</div></div>
+              <div class="stat-card"><h4>Total Appointments</h4><div class="value" id="statAppointments">0</div></div>
+              <div class="stat-card"><h4>Total Revenue</h4><div class="value" id="statRevenue">₹0</div></div>
+            </div>
+
+            <div style="height:18px"></div>
+
+            <div class="grid-2">
+              <div class="summary-box">
+                <h4 style="margin-bottom: 10px;">Recent Patients</h4>
+                <div id="recentPatients"></div>
+              </div>
+              <div class="summary-box">
+                <h4 style="margin-bottom: 10px;">Upcoming Appointments</h4>
+                <div id="recentAppointments"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PATIENTS -->
+          <section class="section hidden" id="patients">
+            <div class="section-head"><div><h3>Patient Management</h3><p>Add, search, and manage patient records.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Patient Name</label><input type="text" id="patientName" placeholder="Enter patient name" /></div>
+                <div class="field"><label>Age</label><input type="number" id="patientAge" placeholder="Enter age" /></div>
+                <div class="field"><label>Gender</label><select id="patientGender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+                <div class="field"><label>Phone</label><input type="text" id="patientPhone" placeholder="Enter phone number" /></div>
+                <div class="field"><label>Disease / Problem</label><input type="text" id="patientDisease" placeholder="Enter disease/problem" /></div>
+                <button class="btn btn-primary" onclick="addPatient()">Add Patient</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="patientSearch" placeholder="Search patient by name or phone" oninput="renderPatients()" /></div>
+                <div id="patientsTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- DOCTORS -->
+          <section class="section hidden" id="doctors">
+            <div class="section-head"><div><h3>Doctor Management</h3><p>Add and manage doctors with specialization.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Doctor Name</label><input type="text" id="doctorName" placeholder="Enter doctor name" /></div>
+                <div class="field"><label>Specialization</label><input type="text" id="doctorSpecialization" placeholder="e.g. Cardiologist" /></div>
+                <div class="field"><label>Phone</label><input type="text" id="doctorPhone" placeholder="Enter phone number" /></div>
+                <button class="btn btn-primary" onclick="addDoctor()">Add Doctor</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="doctorSearch" placeholder="Search doctor by name or specialization" oninput="renderDoctors()" /></div>
+                <div id="doctorsTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- APPOINTMENTS -->
+          <section class="section hidden" id="appointments">
+            <div class="section-head"><div><h3>Appointment Booking</h3><p>Book and manage patient appointments with doctors.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Select Patient</label><select id="appointmentPatient"></select></div>
+                <div class="field"><label>Select Doctor</label><select id="appointmentDoctor"></select></div>
+                <div class="field"><label>Date</label><input type="date" id="appointmentDate" /></div>
+                <div class="field"><label>Time</label><input type="time" id="appointmentTime" /></div>
+                <button class="btn btn-primary" onclick="addAppointment()">Book Appointment</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="appointmentSearch" placeholder="Search appointment by patient or doctor" oninput="renderAppointments()" /></div>
+                <div id="appointmentsTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- BILLING -->
+          <section class="section hidden" id="billing">
+            <div class="section-head"><div><h3>Billing / Invoice</h3><p>Generate bills and calculate hospital revenue.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Select Patient</label><select id="billPatient"></select></div>
+                <div class="field"><label>Treatment Charge</label><input type="number" id="treatmentCharge" placeholder="Enter treatment charge" /></div>
+                <div class="field"><label>Medicine Charge</label><input type="number" id="medicineCharge" placeholder="Enter medicine charge" /></div>
+                <div class="field"><label>Room Charge</label><input type="number" id="roomCharge" placeholder="Enter room charge" /></div>
+                <div class="field"><label>Payment Status</label><select id="paymentStatus"><option value="Paid">Paid</option><option value="Pending">Pending</option></select></div>
+                <button class="btn btn-primary" onclick="addBill()">Generate Bill</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="billSearch" placeholder="Search bill by patient name" oninput="renderBills()" /></div>
+                <div id="billsTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PHARMACY -->
+          <section class="section hidden" id="pharmacy">
+            <div class="section-head"><div><h3>Pharmacy Module</h3><p>Manage medicines and stock quantity.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Medicine Name</label><input type="text" id="medicineName" placeholder="Enter medicine name" /></div>
+                <div class="field"><label>Quantity</label><input type="number" id="medicineQty" placeholder="Enter quantity" /></div>
+                <div class="field"><label>Price</label><input type="number" id="medicinePrice" placeholder="Enter price" /></div>
+                <button class="btn btn-primary" onclick="addMedicine()">Add Medicine</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="medicineSearch" placeholder="Search medicine by name" oninput="renderMedicines()" /></div>
+                <div id="medicinesTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- LAB -->
+          <section class="section hidden" id="laboratory">
+            <div class="section-head"><div><h3>Laboratory Module</h3><p>Add test reports and track lab records.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Select Patient</label><select id="labPatient"></select></div>
+                <div class="field"><label>Test Name</label><input type="text" id="labTestName" placeholder="Enter test name" /></div>
+                <div class="field"><label>Result</label><textarea id="labResult" placeholder="Enter test result"></textarea></div>
+                <button class="btn btn-primary" onclick="addLabTest()">Add Test Report</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="labSearch" placeholder="Search lab report by patient or test" oninput="renderLabTests()" /></div>
+                <div id="labTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- DISCHARGE -->
+          <section class="section hidden" id="discharge">
+            <div class="section-head"><div><h3>Discharge Summary</h3><p>Create and store patient discharge summaries.</p></div></div>
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field"><label>Select Patient</label><select id="dischargePatient"></select></div>
+                <div class="field"><label>Doctor Advice</label><textarea id="doctorAdvice" placeholder="Enter doctor advice"></textarea></div>
+                <div class="field"><label>Discharge Date</label><input type="date" id="dischargeDate" /></div>
+                <button class="btn btn-primary" onclick="addDischarge()">Save Discharge Summary</button>
+              </div>
+              <div>
+                <div class="toolbar"><input type="text" id="dischargeSearch" placeholder="Search discharge by patient name" oninput="renderDischarges()" /></div>
+                <div id="dischargeTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ADMIN PANEL -->
+          <section class="section hidden" id="adminPanel">
+            <div class="section-head">
+              <div>
+                <h3>Admin Module</h3>
+                <p>Admin can manage system users and access all hospital information.</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="grid">
+                <div class="field">
+                  <label>New Username</label>
+                  <input type="text" id="adminNewUsername" placeholder="Enter username" />
+                </div>
+                <div class="field">
+                  <label>New Password</label>
+                  <input type="password" id="adminNewPassword" placeholder="Enter password" />
+                </div>
+                <div class="field">
+                  <label>Role</label>
+                  <select id="adminNewRole">
+                    <option value="Staff">Staff</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="adminCreateUser()">Create User</button>
+              </div>
+
+              <div>
+                <div class="toolbar">
+                  <input type="text" id="userSearch" placeholder="Search user by username or role" oninput="renderUsers()" />
+                </div>
+                <div id="usersTableWrap"></div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----------------------------
+    // STORAGE KEYS
+    // ----------------------------
+    const STORAGE_KEYS = {
+      users: "hms_users",
+      currentUser: "hms_current_user",
+      patients: "hms_patients",
+      doctors: "hms_doctors",
+      appointments: "hms_appointments",
+      bills: "hms_bills",
+      medicines: "hms_medicines",
+      labTests: "hms_lab_tests",
+      discharges: "hms_discharges"
+    };
+
+    // ----------------------------
+    // HELPERS
+    // ----------------------------
+    function getData(key, fallback = []) {
+      return JSON.parse(localStorage.getItem(key)) || fallback;
+    }
+
+    function setData(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function generateId(prefix) {
+      return prefix + "_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+    }
+
+    function showLoader(show = true) {
+      document.getElementById("loaderOverlay").style.display = show ? "flex" : "none";
+    }
+
+    function fakeProcess(callback, delay = 500) {
+      showLoader(true);
+      setTimeout(() => {
+        callback();
+        showLoader(false);
+      }, delay);
+    }
+
+    function showToast(type, title, message) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<strong>${title}</strong><div>${message}</div>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(30px)";
+        toast.style.transition = "all .3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    function currentUser() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser));
+    }
+
+    function isAdmin() {
+      const user = currentUser();
+      return user && user.role === "Admin";
+    }
+
+    function requireAdmin() {
+      if (!isAdmin()) {
+        showToast("error", "Access Denied", "Only admin can access this module.");
+        return false;
+      }
+      return true;
+    }
+
+    // ----------------------------
+    // DEFAULT ADMIN
+    // ----------------------------
+    function ensureDefaultUser() {
+      const users = getData(STORAGE_KEYS.users, []);
+      const hasAdmin = users.some(u => u.username === "admin");
+      if (!hasAdmin) {
+        users.push({
+          id: generateId("user"),
+          username: "admin",
+          password: "admin123",
+          role: "Admin",
+          createdAt: new Date().toLocaleString()
+        });
+        setData(STORAGE_KEYS.users, users);
+      }
+    }
+    ensureDefaultUser();
+
+    // ----------------------------
+    // DOM
+    // ----------------------------
+    const authSection = document.getElementById("authSection");
+    const appSection = document.getElementById("appSection");
+    const headerActions = document.getElementById("headerActions");
+
+    // ----------------------------
+    // AUTH
+    // ----------------------------
+    function toggleAuth(type) {
+      document.getElementById("loginCard").classList.toggle("hidden", type !== "login");
+      document.getElementById("signupCard").classList.toggle("hidden", type !== "signup");
+    }
+
+    function signup() {
+      const username = document.getElementById("signupUsername").value.trim();
+      const password = document.getElementById("signupPassword").value.trim();
+      const role = document.getElementById("signupRole").value;
+
+      if (!username || !password) {
+        showToast("error", "Missing Fields", "Please enter username and password.");
+        return;
+      }
+
+      const users = getData(STORAGE_KEYS.users, []);
+      const exists = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+
+      if (exists) {
+        showToast("warning", "Duplicate User", "Username already exists.");
+        return;
+      }
+
+      users.push({
+        id: generateId("user"),
+        username,
+        password,
+        role,
+        createdAt: new Date().toLocaleString()
+      });
+
+      setData(STORAGE_KEYS.users, users);
+      document.getElementById("signupUsername").value = "";
+      document.getElementById("signupPassword").value = "";
+      document.getElementById("signupRole").value = "Staff";
+      showToast("success", "Signup Successful", "Now login with your new account.");
+      toggleAuth("login");
+    }
+
+    function login() {
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      fakeProcess(() => {
+        const users = getData(STORAGE_KEYS.users, []);
+        const user = users.find(u => u.username === username && u.password === password);
+
+        if (!user) {
+          showToast("error", "Login Failed", "Invalid username or password.");
+          return;
+        }
+
+        localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
+        showToast("success", "Login Successful", `Welcome ${user.username}!`);
+        initApp();
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem(STORAGE_KEYS.currentUser);
+      authSection.classList.remove("hidden");
+      appSection.classList.add("hidden");
+      headerActions.classList.add("hidden");
+      document.getElementById("loginUsername").value = "";
+      document.getElementById("loginPassword").value = "";
+      toggleAuth("login");
+      showToast("success", "Logged Out", "You have been logged out successfully.");
+    }
+
+    function initApp() {
+      const user = currentUser();
+      if (!user) return;
+
+      authSection.classList.add("hidden");
+      appSection.classList.remove("hidden");
+      headerActions.classList.remove("hidden");
+
+      document.getElementById("currentUserName").textContent = user.username;
+      document.getElementById("avatarText").textContent = user.username.charAt(0).toUpperCase();
+      document.getElementById("currentUserRoleText").textContent = user.role === "Admin" ? "System Administrator" : "Hospital Staff";
+
+      const roleBadge = document.getElementById("roleBadge");
+      roleBadge.textContent = user.role;
+      roleBadge.className = "pill " + (user.role === "Admin" ? "pill-admin" : "pill-staff");
+
+      document.getElementById("adminNavBtn").classList.toggle("hidden", user.role !== "Admin");
+
+      refreshDropdowns();
+      renderAll();
+      showSection("dashboard");
+    }
+
+    // ----------------------------
+    // SECTION SWITCH
+    // ----------------------------
+    function showSection(sectionId, btn = null) {
+      if (sectionId === "adminPanel" && !requireAdmin()) return;
+
+      document.querySelectorAll(".content .section").forEach(sec => sec.classList.add("hidden"));
+      const section = document.getElementById(sectionId);
+      section.classList.remove("hidden");
+      section.classList.add("animate-fade-up");
+
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      if (btn) {
+        btn.classList.add("active");
+      } else {
+        const buttons = document.querySelectorAll(".nav button");
+        buttons.forEach(b => {
+          if (b.getAttribute("onclick") && b.getAttribute("onclick").includes("'" + sectionId + "'")) {
+            b.classList.add("active");
+          }
+        });
+      }
+    }
+
+    // ----------------------------
+    // DATA GETTERS
+    // ----------------------------
+    function patients() { return getData(STORAGE_KEYS.patients, []); }
+    function doctors() { return getData(STORAGE_KEYS.doctors, []); }
+    function appointments() { return getData(STORAGE_KEYS.appointments, []); }
+    function bills() { return getData(STORAGE_KEYS.bills, []); }
+    function medicines() { return getData(STORAGE_KEYS.medicines, []); }
+    function labTests() { return getData(STORAGE_KEYS.labTests, []); }
+    function discharges() { return getData(STORAGE_KEYS.discharges, []); }
+
+    // ----------------------------
+    // PATIENTS
+    // ----------------------------
+    function addPatient() {
+      const name = document.getElementById("patientName").value.trim();
+      const age = document.getElementById("patientAge").value.trim();
+      const gender = document.getElementById("patientGender").value;
+      const phone = document.getElementById("patientPhone").value.trim();
+      const disease = document.getElementById("patientDisease").value.trim();
+
+      if (!name || !age || !gender || !phone || !disease) {
+        showToast("error", "Missing Fields", "Please fill all patient fields.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const data = patients();
+        data.push({ id: generateId("pat"), name, age, gender, phone, disease, createdAt: new Date().toLocaleString() });
+        setData(STORAGE_KEYS.patients, data);
+
+        document.getElementById("patientName").value = "";
+        document.getElementById("patientAge").value = "";
+        document.getElementById("patientGender").value = "";
+        document.getElementById("patientPhone").value = "";
+        document.getElementById("patientDisease").value = "";
+
+        refreshDropdowns();
+        renderAll();
+        showToast("success", "Patient Added", `${name} has been added successfully.`);
+      });
+    }
+
+    function deletePatient(id) {
+      if (!confirm("Delete this patient?")) return;
+      setData(STORAGE_KEYS.patients, patients().filter(p => p.id !== id));
+      refreshDropdowns();
+      renderAll();
+      showToast("success", "Deleted", "Patient deleted successfully.");
+    }
+
+    function renderPatients() {
+      const q = document.getElementById("patientSearch").value.toLowerCase().trim();
+      const data = patients().filter(p => p.name.toLowerCase().includes(q) || p.phone.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("patientsTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No patient records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Disease</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(p => `
+              <tr>
+                <td>${p.name}</td>
+                <td>${p.age}</td>
+                <td>${p.gender}</td>
+                <td>${p.phone}</td>
+                <td>${p.disease}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deletePatient('${p.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // DOCTORS
+    // ----------------------------
+    function addDoctor() {
+      const name = document.getElementById("doctorName").value.trim();
+      const specialization = document.getElementById("doctorSpecialization").value.trim();
+      const phone = document.getElementById("doctorPhone").value.trim();
+
+      if (!name || !specialization || !phone) {
+        showToast("error", "Missing Fields", "Please fill all doctor fields.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const data = doctors();
+        data.push({ id: generateId("doc"), name, specialization, phone, createdAt: new Date().toLocaleString() });
+        setData(STORAGE_KEYS.doctors, data);
+
+        document.getElementById("doctorName").value = "";
+        document.getElementById("doctorSpecialization").value = "";
+        document.getElementById("doctorPhone").value = "";
+
+        refreshDropdowns();
+        renderAll();
+        showToast("success", "Doctor Added", `${name} has been added successfully.`);
+      });
+    }
+
+    function deleteDoctor(id) {
+      if (!confirm("Delete this doctor?")) return;
+      setData(STORAGE_KEYS.doctors, doctors().filter(d => d.id !== id));
+      refreshDropdowns();
+      renderAll();
+      showToast("success", "Deleted", "Doctor deleted successfully.");
+    }
+
+    function renderDoctors() {
+      const q = document.getElementById("doctorSearch").value.toLowerCase().trim();
+      const data = doctors().filter(d => d.name.toLowerCase().includes(q) || d.specialization.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("doctorsTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No doctor records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Specialization</th><th>Phone</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(d => `
+              <tr>
+                <td>${d.name}</td>
+                <td>${d.specialization}</td>
+                <td>${d.phone}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deleteDoctor('${d.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // APPOINTMENTS
+    // ----------------------------
+    function addAppointment() {
+      const patientId = document.getElementById("appointmentPatient").value;
+      const doctorId = document.getElementById("appointmentDoctor").value;
+      const date = document.getElementById("appointmentDate").value;
+      const time = document.getElementById("appointmentTime").value;
+
+      if (!patientId || !doctorId || !date || !time) {
+        showToast("error", "Missing Fields", "Please fill all appointment fields.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const patient = patients().find(p => p.id === patientId);
+        const doctor = doctors().find(d => d.id === doctorId);
+
+        const data = appointments();
+        data.push({
+          id: generateId("app"),
+          patientId,
+          doctorId,
+          patientName: patient ? patient.name : "",
+          doctorName: doctor ? doctor.name : "",
+          date,
+          time
+        });
+        setData(STORAGE_KEYS.appointments, data);
+
+        document.getElementById("appointmentDate").value = "";
+        document.getElementById("appointmentTime").value = "";
+
+        renderAll();
+        showToast("success", "Appointment Booked", "Appointment has been booked successfully.");
+      });
+    }
+
+    function deleteAppointment(id) {
+      if (!confirm("Delete this appointment?")) return;
+      setData(STORAGE_KEYS.appointments, appointments().filter(a => a.id !== id));
+      renderAll();
+      showToast("success", "Deleted", "Appointment deleted successfully.");
+    }
+
+    function renderAppointments() {
+      const q = document.getElementById("appointmentSearch").value.toLowerCase().trim();
+      const data = appointments().filter(a => a.patientName.toLowerCase().includes(q) || a.doctorName.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("appointmentsTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No appointment records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(a => `
+              <tr>
+                <td>${a.patientName}</td>
+                <td>${a.doctorName}</td>
+                <td>${a.date}</td>
+                <td>${a.time}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deleteAppointment('${a.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // BILLING
+    // ----------------------------
+    function addBill() {
+      const patientId = document.getElementById("billPatient").value;
+      const treatmentCharge = Number(document.getElementById("treatmentCharge").value || 0);
+      const medicineCharge = Number(document.getElementById("medicineCharge").value || 0);
+      const roomCharge = Number(document.getElementById("roomCharge").value || 0);
+      const paymentStatus = document.getElementById("paymentStatus").value;
+
+      if (!patientId) {
+        showToast("error", "Missing Patient", "Please select a patient.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const patient = patients().find(p => p.id === patientId);
+        const total = treatmentCharge + medicineCharge + roomCharge;
+
+        const data = bills();
+        data.push({
+          id: generateId("bill"),
+          patientId,
+          patientName: patient ? patient.name : "",
+          treatmentCharge,
+          medicineCharge,
+          roomCharge,
+          total,
+          paymentStatus,
+          date: new Date().toLocaleDateString()
+        });
+        setData(STORAGE_KEYS.bills, data);
+
+        document.getElementById("treatmentCharge").value = "";
+        document.getElementById("medicineCharge").value = "";
+        document.getElementById("roomCharge").value = "";
+        document.getElementById("paymentStatus").value = "Paid";
+
+        renderAll();
+        showToast("success", "Bill Generated", "Patient bill generated successfully.");
+      });
+    }
+
+    function deleteBill(id) {
+      if (!confirm("Delete this bill?")) return;
+      setData(STORAGE_KEYS.bills, bills().filter(b => b.id !== id));
+      renderAll();
+      showToast("success", "Deleted", "Bill deleted successfully.");
+    }
+
+    function renderBills() {
+      const q = document.getElementById("billSearch").value.toLowerCase().trim();
+      const data = bills().filter(b => b.patientName.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("billsTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No billing records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Patient</th><th>Treatment</th><th>Medicine</th><th>Room</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(b => `
+              <tr>
+                <td>${b.patientName}</td>
+                <td>₹${b.treatmentCharge}</td>
+                <td>₹${b.medicineCharge}</td>
+                <td>₹${b.roomCharge}</td>
+                <td><b>₹${b.total}</b></td>
+                <td><span class="pill ${b.paymentStatus === 'Paid' ? 'pill-paid' : 'pill-pending'}">${b.paymentStatus}</span></td>
+                <td>${b.date}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deleteBill('${b.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // PHARMACY
+    // ----------------------------
+    function addMedicine() {
+      const name = document.getElementById("medicineName").value.trim();
+      const qty = Number(document.getElementById("medicineQty").value || 0);
+      const price = Number(document.getElementById("medicinePrice").value || 0);
+
+      if (!name || qty <= 0 || price <= 0) {
+        showToast("error", "Invalid Input", "Please enter valid medicine details.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const data = medicines();
+        data.push({ id: generateId("med"), name, qty, price });
+        setData(STORAGE_KEYS.medicines, data);
+
+        document.getElementById("medicineName").value = "";
+        document.getElementById("medicineQty").value = "";
+        document.getElementById("medicinePrice").value = "";
+
+        renderAll();
+        showToast("success", "Medicine Added", `${name} has been added.`);
+      });
+    }
+
+    function deleteMedicine(id) {
+      if (!confirm("Delete this medicine?")) return;
+      setData(STORAGE_KEYS.medicines, medicines().filter(m => m.id !== id));
+      renderAll();
+      showToast("success", "Deleted", "Medicine deleted successfully.");
+    }
+
+    function renderMedicines() {
+      const q = document.getElementById("medicineSearch").value.toLowerCase().trim();
+      const data = medicines().filter(m => m.name.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("medicinesTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No medicine records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Medicine</th><th>Quantity</th><th>Price</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(m => `
+              <tr>
+                <td>${m.name}</td>
+                <td>${m.qty}</td>
+                <td>₹${m.price}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deleteMedicine('${m.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // LAB TESTS
+    // ----------------------------
+    function addLabTest() {
+      const patientId = document.getElementById("labPatient").value;
+      const testName = document.getElementById("labTestName").value.trim();
+      const result = document.getElementById("labResult").value.trim();
+
+      if (!patientId || !testName || !result) {
+        showToast("error", "Missing Fields", "Please fill all laboratory fields.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const patient = patients().find(p => p.id === patientId);
+        const data = labTests();
+
+        data.push({
+          id: generateId("lab"),
+          patientId,
+          patientName: patient ? patient.name : "",
+          testName,
+          result,
+          date: new Date().toLocaleDateString()
+        });
+
+        setData(STORAGE_KEYS.labTests, data);
+
+        document.getElementById("labTestName").value = "";
+        document.getElementById("labResult").value = "";
+
+        renderAll();
+        showToast("success", "Lab Report Added", "Lab report saved successfully.");
+      });
+    }
+
+    function deleteLabTest(id) {
+      if (!confirm("Delete this lab report?")) return;
+      setData(STORAGE_KEYS.labTests, labTests().filter(l => l.id !== id));
+      renderAll();
+      showToast("success", "Deleted", "Lab report deleted successfully.");
+    }
+
+    function renderLabTests() {
+      const q = document.getElementById("labSearch").value.toLowerCase().trim();
+      const data = labTests().filter(l => l.patientName.toLowerCase().includes(q) || l.testName.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("labTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No laboratory records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Patient</th><th>Test</th><th>Result</th><th>Date</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(l => `
+              <tr>
+                <td>${l.patientName}</td>
+                <td>${l.testName}</td>
+                <td>${l.result}</td>
+                <td>${l.date}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deleteLabTest('${l.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // DISCHARGE
+    // ----------------------------
+    function addDischarge() {
+      const patientId = document.getElementById("dischargePatient").value;
+      const advice = document.getElementById("doctorAdvice").value.trim();
+      const date = document.getElementById("dischargeDate").value;
+
+      if (!patientId || !advice || !date) {
+        showToast("error", "Missing Fields", "Please fill all discharge fields.");
+        return;
+      }
+
+      fakeProcess(() => {
+        const patient = patients().find(p => p.id === patientId);
+        const data = discharges();
+
+        data.push({
+          id: generateId("dis"),
+          patientId,
+          patientName: patient ? patient.name : "",
+          advice,
+          date
+        });
+
+        setData(STORAGE_KEYS.discharges, data);
+
+        document.getElementById("doctorAdvice").value = "";
+        document.getElementById("dischargeDate").value = "";
+
+        renderAll();
+        showToast("success", "Discharge Saved", "Discharge summary saved successfully.");
+      });
+    }
+
+    function deleteDischarge(id) {
+      if (!confirm("Delete this discharge summary?")) return;
+      setData(STORAGE_KEYS.discharges, discharges().filter(d => d.id !== id));
+      renderAll();
+      showToast("success", "Deleted", "Discharge summary deleted successfully.");
+    }
+
+    function renderDischarges() {
+      const q = document.getElementById("dischargeSearch").value.toLowerCase().trim();
+      const data = discharges().filter(d => d.patientName.toLowerCase().includes(q));
+
+      const wrap = document.getElementById("dischargeTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No discharge records found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Patient</th><th>Doctor Advice</th><th>Discharge Date</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(d => `
+              <tr>
+                <td>${d.patientName}</td>
+                <td>${d.advice}</td>
+                <td>${d.date}</td>
+                <td><div class="actions"><button class="btn btn-danger" onclick="deleteDischarge('${d.id}')">Delete</button></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // ADMIN MODULE
+    // ----------------------------
+    function adminCreateUser() {
+      if (!requireAdmin()) return;
+
+      const username = document.getElementById("adminNewUsername").value.trim();
+      const password = document.getElementById("adminNewPassword").value.trim();
+      const role = document.getElementById("adminNewRole").value;
+
+      if (!username || !password) {
+        showToast("error", "Missing Fields", "Please fill all user details.");
+        return;
+      }
+
+      const users = getData(STORAGE_KEYS.users, []);
+      const exists = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+
+      if (exists) {
+        showToast("warning", "Duplicate User", "Username already exists.");
+        return;
+      }
+
+      fakeProcess(() => {
+        users.push({
+          id: generateId("user"),
+          username,
+          password,
+          role,
+          createdAt: new Date().toLocaleString()
+        });
+
+        setData(STORAGE_KEYS.users, users);
+
+        document.getElementById("adminNewUsername").value = "";
+        document.getElementById("adminNewPassword").value = "";
+        document.getElementById("adminNewRole").value = "Staff";
+
+        renderUsers();
+        showToast("success", "User Created", `${username} has been created as ${role}.`);
+      });
+    }
+
+    function deleteUser(id) {
+      if (!requireAdmin()) return;
+
+      const users = getData(STORAGE_KEYS.users, []);
+      const user = users.find(u => u.id === id);
+
+      if (!user) return;
+      if (user.username === "admin") {
+        showToast("warning", "Protected User", "Default admin cannot be deleted.");
+        return;
+      }
+
+      if (!confirm("Delete this user?")) return;
+
+      setData(STORAGE_KEYS.users, users.filter(u => u.id !== id));
+      renderUsers();
+      showToast("success", "User Deleted", "System user deleted successfully.");
+    }
+
+    function renderUsers() {
+      const q = document.getElementById("userSearch").value.toLowerCase().trim();
+      const data = getData(STORAGE_KEYS.users, []).filter(u =>
+        u.username.toLowerCase().includes(q) || u.role.toLowerCase().includes(q)
+      );
+
+      const wrap = document.getElementById("usersTableWrap");
+      if (!data.length) {
+        wrap.innerHTML = `<div class="empty">No users found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Username</th><th>Role</th><th>Created</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${data.map(u => `
+              <tr>
+                <td>${u.username}</td>
+                <td><span class="pill ${u.role === 'Admin' ? 'pill-admin' : 'pill-staff'}">${u.role}</span></td>
+                <td>${u.createdAt || '-'}</td>
+                <td>
+                  <div class="actions">
+                    ${u.username === 'admin'
+                      ? `<span class="small">Protected</span>`
+                      : `<button class="btn btn-danger" onclick="deleteUser('${u.id}')">Delete</button>`
+                    }
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ----------------------------
+    // DROPDOWNS
+    // ----------------------------
+    function refreshDropdowns() {
+      const patientOptions = `<option value="">Select patient</option>` + patients().map(p => `<option value="${p.id}">${p.name}</option>`).join("");
+      const doctorOptions = `<option value="">Select doctor</option>` + doctors().map(d => `<option value="${d.id}">${d.name} (${d.specialization})</option>`).join("");
+
+      ["appointmentPatient", "billPatient", "labPatient", "dischargePatient"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = patientOptions;
+      });
+
+      const doctorDropdown = document.getElementById("appointmentDoctor");
+      if (doctorDropdown) doctorDropdown.innerHTML = doctorOptions;
+    }
+
+    // ----------------------------
+    // DASHBOARD
+    // ----------------------------
+    function renderDashboard() {
+      document.getElementById("statPatients").textContent = patients().length;
+      document.getElementById("statDoctors").textContent = doctors().length;
+      document.getElementById("statAppointments").textContent = appointments().length;
+
+      const revenue = bills().filter(b => b.paymentStatus === "Paid").reduce((sum, b) => sum + Number(b.total || 0), 0);
+      document.getElementById("statRevenue").textContent = "₹" + revenue;
+
+      const rp = patients().slice(-5).reverse();
+      document.getElementById("recentPatients").innerHTML = rp.length
+        ? rp.map(p => `<div style="padding:10px 0;border-bottom:1px solid var(--border);"><b>${p.name}</b> • ${p.disease}</div>`).join("")
+        : `<div class="small">No recent patients.</div>`;
+
+      const ra = appointments().slice(-5).reverse();
+      document.getElementById("recentAppointments").innerHTML = ra.length
+        ? ra.map(a => `<div style="padding:10px 0;border-bottom:1px solid var(--border);"><b>${a.patientName}</b> with ${a.doctorName}<br><span class="small">${a.date} at ${a.time}</span></div>`).join("")
+        : `<div class="small">No upcoming appointments.</div>`;
+    }
+
+    // ----------------------------
+    // RENDER ALL
+    // ----------------------------
+    function renderAll() {
+      renderPatients();
+      renderDoctors();
+      renderAppointments();
+      renderBills();
+      renderMedicines();
+      renderLabTests();
+      renderDischarges();
+      renderDashboard();
+      renderUsers();
+      refreshDropdowns();
+    }
+
+    // ----------------------------
+    // AUTO INIT
+    // ----------------------------
+    window.onload = function() {
+      const user = currentUser();
+      if (user) {
+        initApp();
+      } else {
+        toggleAuth("login");
+      }
+    };
+  </script>
+</body>
+</html>
